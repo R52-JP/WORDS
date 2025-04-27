@@ -16,6 +16,10 @@
       font-family: 'MSGothic'; 
       src: url('https://r52-jp.github.io/WORDS/Fonts/msgothic.ttc') format('truetype');
     }
+    @font-face {
+      font-family: 'Edwin'; 
+      src: url('https://r52-jp.github.io/WORDS/Fonts/Edwin-Roman.otf') format('opentype');
+    }
     h1 {
         border-bottom: double 5px #FFC778;
     }
@@ -42,8 +46,20 @@
       line-height: 0.5;
       font-family: "MPlus1-Ebold";
     }
+    .english {
+      font-family: "Edwin";
+    }
     span {
       border-bottom: solid 1px red;
+    }
+    .error {
+      color: red;
+      font-family: "MPlus1-Ebold";
+      font-size: 20px;
+    }
+    .check_number {
+      list-style: 0.5;
+      font-family: "MPlus1-Ebold";
     }
   </style>
 </head>
@@ -53,6 +69,7 @@
   <input type="number" min="1" max="71" value="1" id="lesson-number"></input>
   <a>　　</a>
   <button id="res" onclick="res_clicked();">更新</button>
+  <a id="check_number" class="check_number"></a>
   <p></p>
   <button id="show_Japanese">日本語のみを表示</button><a>　　</a><button id="show_English">英語のみを表示</button><a>　　</a><button id="show_All">すべて表示</button>
   <div id="main"></div>
@@ -130,9 +147,21 @@
           a.setAttribute('onclick', clickevent);
       }
     };
+    
+    function check_number() {
+      for(let i=1;i<=71;i++) {
+        let check_url = "https://r52-jp.github.io/WORDS/Data/" + i + ".txt";
+        $.get(check_url, (data) => {
+          document.getElementById("check_number").innerText = "（Lesson-" + String(i) + "まで実装されています）"
+        })
+        .fail((jqXHR, errorMsg) => {
+        });
+      }
+    };
 
     // 「更新」ボタンが押された時の処理.
     function res_clicked() {
+      main_element.innerHTML = "";
       let url = "https://r52-jp.github.io/WORDS/Data/" + lesson_number.value + ".txt"; // 入力ボックスの中身からURLを生成.
       console.log(url);
       $.get(url, (data) => {
@@ -158,8 +187,17 @@
         document.getElementById("show_Japanese").setAttribute("onclick", "hide_english(" + String(word_list.length) + ")");
         document.getElementById("show_English").setAttribute("onclick", "hide_japanese(" + String(word_list.length) + ")");
         document.getElementById("show_All").setAttribute("onclick", "show_all(" + String(word_list.length) + ")");
+      })
+      .fail((jqXHR, errorMsg) => {
+        alert("レッスン番号の入力値が無効です。まだ実装されていないか，あるいは自然数ではない可能性があります。")
+        main_element.innerHTML = "<a class=\"error\">エラー：入力値が無効です</a>";
       });
     };
+
+    // 初期に実行される部分
+    res_clicked()
+    check_number()
+
     </script>
 </body>
 </html>
