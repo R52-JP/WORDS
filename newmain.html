@@ -6,26 +6,164 @@
   <style>
     @font-face {
       font-family: 'MPlus1-Ebold'; 
-      src: url('.\Fonts\MPLUS1-ExtraBold.ttf') format('truetype');
+      src: url('https://r52-jp.github.io/WORDS/Fonts/MPLUS1-ExtraBold.ttf') format('truetype');
+    }
+    @font-face {
+      font-family: 'NotoSans-Medium'; 
+      src: url('https://r52-jp.github.io/WORDS/Fonts/NotoSansJP-Medium.ttf') format('truetype');
+    }
+    @font-face {
+      font-family: 'MSGothic'; 
+      src: url('https://r52-jp.github.io/WORDS/Fonts/msgothic.ttc') format('truetype');
     }
     h1 {
         border-bottom: double 5px #FFC778;
     }
     a {
         line-height: 0.5;
-        font-family: "MPlus1-Ebold";
+        font-family: "MSGothic";
     }
     h1 {
         line-height: 1.5;
         font-family: "MPlus1-Ebold";
     }
-    h4 {
+    input {
         line-height: 0.5;
+        font-size: 20px;
         font-family: "MPlus1-Ebold";
+        width: 3em;
+    }
+    button {
+        line-height: 1.5;
+        font-size: 15px;
+        font-family: "NotoSans-Medium";
+    }
+    .lesson-number {
+      line-height: 0.5;
+      font-family: "MPlus1-Ebold";
+    }
+    .japanese {
+      line-height: 0.5;
+      font-family: "MSGothic";
+    }
+    span {
+      border-bottom: solid 1px red;
     }
   </style>
 </head>
 <body>
-  <script></script>
   <h1>Z会｢速読英単語 - 必修編｣</h1>
+  <a class="lesson-number">レッスン番号：</a>
+  <input type="number" min="1" max="71" value="1" id="lesson-number"></input>
+  <a>　　</a>
+  <button id="res" onclick="res_clicked();">更新</button>
+  <p></p>
+  <button id="show_Japanese">日本語のみを表示</button><a>　　</a><button id="show_English">英語のみを表示</button><a>　　</a><button id="show_All">すべて表示</button>
+  <div id="main"></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+  <script language="javascript" type="text/javascript">
+    let lesson_number = document.getElementById('lesson-number'); // レッスン番号入力欄のvalueを取得.
+    let main_element = document.getElementById('main');
+
+    // 個別に色を変える(黒→白，白→黒)関数.
+    let change_color = (id) => {
+        let a = document.getElementById(id);
+        if (a.style.color == "black") {
+            a.style.color = "#ffffff";
+        }
+        else {
+            a.style.color = "black";
+        }
+    }
+    
+    // 英語を非表示にして日本語を表示させる関数.
+    let hide_english = (tc) => {
+        for(let i=1;i<=tc;i++) {
+            let id = i + "a";
+            let a = document.getElementById(id);
+            a.style.color = "#ffffff";
+        }
+        for(let i=1;i<=tc;i++) {
+            let id = i + "b";
+            let a = document.getElementById(id);
+            a.style.color = "black";
+        }
+    }
+
+    // 英語を表示させて日本語を非表示にする関数.
+    let hide_japanese = (tc) => {
+        for(let i=1;i<=tc;i++) {
+            let id = i + "a";
+            let a = document.getElementById(id);
+            a.style.color = "black";
+        }
+        for(let i=1;i<=tc;i++) {
+            let id = i + "b";
+            let a = document.getElementById(id);
+            a.style.color = "#ffffff";
+        }
+    }
+    
+    // 英語・日本語をすべて表示させる関数.
+    let show_all = (tc) => {
+        for(let i=1;i<=tc;i++) {
+            let id = i + "a";
+            let a = document.getElementById(id);
+            a.style.color = "black";
+        }
+        for(let i=1;i<=tc;i++) {
+            let id = i + "b";
+            let a = document.getElementById(id);
+            a.style.color = "black";
+        }
+    }
+
+    // クリックしたときに色が切り替わるように，onclickにchange_color(id)を割り当てる関数.
+    let set_onlick = (tc) => {
+      for(let i=1;i<=tc;i++) {
+          let id = i + "a";
+          let a = document.getElementById(id);
+          let clickevent = "change_color(\"" + id + "\");"
+          a.setAttribute('onclick', clickevent);
+      }
+      for(let i=1;i<=tc;i++) {
+          let id = i + "b";
+          let a = document.getElementById(id);
+          let clickevent = "change_color(\"" + id + "\");"
+          a.setAttribute('onclick', clickevent);
+      }
+    };
+
+    // 「更新」ボタンが押された時の処理.
+    function res_clicked() {
+      let url = "https://r52-jp.github.io/WORDS/Data/" + lesson_number.value + ".txt"; // 入力ボックスの中身からURLを生成.
+      console.log(url);
+      $.get(url, (data) => {
+        // dataにtxtファイルの中身が代入される.
+        console.log(data);
+        let result = "";
+        let word_list = data.split("\n"); // 改行コードでdataを区切る(つまり，単語ごとにリストに切り崩す).
+        for ( let i=0; i<word_list.length; i++ ) {
+          // 半角コロンでword_list内の各要素の文字列を区切る.
+          // (つまり，それぞれの単語を、英語と日本語訳の2つの要素からなるリストに切り崩す).
+          word_list[i] = word_list[i].split(":"); 
+        };
+        word_list.pop()
+        for ( let i=1; i<=word_list.length; i++ ) {
+          // HTML要素を組み立てる.
+          word_result = "<span><a id=\"" + i + "a\" class=\"english\">" + word_list[i-1][0] + "</a></span><a>……</a><span><a id=\"" + i + "b\" class=\"japanese\">" + word_list[i-1][1] + "</a></span><br>" + "\n";
+          result = result + word_result; // どんどん追加する.
+        };
+        console.log(result)
+        main_element.innerHTML = result; // id="main"であるdiv要素の中身にresultを代入.
+        set_onlick(word_list.length);
+        // 「日本語のみを表示」「英語のみを表示」「すべて表示」の各ボタンのonclickイベントを割り当てる.
+        document.getElementById("show_Japanese").setAttribute("onclick", "hide_english(" + String(word_list.length) + ")");
+        document.getElementById("show_English").setAttribute("onclick", "hide_japanese(" + String(word_list.length) + ")");
+        document.getElementById("show_All").setAttribute("onclick", "show_all(" + String(word_list.length) + ")");
+      });
+    };
+    </script>
+</body>
 </html>
